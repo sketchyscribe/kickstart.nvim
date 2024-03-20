@@ -1,14 +1,14 @@
 return {
   {
-    "folke/zen-mode.nvim",
+    'folke/zen-mode.nvim',
     opts = {
       wezterm = {
         enabled = true,
-        font = "+4",
+        font = '+4',
       },
     },
     keys = {
-      { mode = "n", "<leader>uz", ":ZenMode<CR>", desc = "Toggle [Z]en Mode" }
-    }
-  }
+      { mode = 'n', '<leader>z', ':ZenMode<CR>', desc = 'Toggle [Z]en Mode' },
+    },
+  },
 }

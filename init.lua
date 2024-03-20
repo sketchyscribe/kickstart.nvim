@@ -38,7 +38,7 @@ What is Kickstart?
 
     After understanding a bit more about Lua, you can use `:help lua-guide` as a
     reference for how Neovim integrates Lua.
-    - :help lua-guide
+    - :helplua-guide
     - (or HTML version): https://neovim.io/doc/user/lua-guide.html
 
 Kickstart Guide:
@@ -161,7 +161,8 @@ vim.opt.softtabstop = 2
 vim.opt.expandtab = true
 
 vim.opt.termguicolors = true
-
+vim.opt.wrap = true
+vim.opt.conceallevel = 1
 -- [[ Basic Keymaps ]]
 --  See `:help vim.keymap.set()`
 
@@ -173,7 +174,9 @@ vim.keymap.set('n', '<Esc>', '<cmd>nohlsearch<CR>')
 vim.keymap.set('n', '[d', vim.diagnostic.goto_prev, { desc = 'Go to previous [D]iagnostic message' })
 vim.keymap.set('n', ']d', vim.diagnostic.goto_next, { desc = 'Go to next [D]iagnostic message' })
 vim.keymap.set('n', '<leader>e', vim.diagnostic.open_float, { desc = 'Show diagnostic [E]rror messages' })
-vim.keymap.set('n', '<leader>q', vim.diagnostic.setloclist, { desc = 'Open diagnostic [Q]uickfix list' })
+-- vim.keymap.set('n', '<leader>q', vim.diagnostic.setloclist, { desc = 'Open diagnostic [Q]uickfix list' })
+vim.keymap.set('n', '<leader>q', ':TroubleToggle quickfix<CR>', { desc = 'Open [Q]uickfix list' })
+vim.keymap.set('n', '<leader>q', ':TroubleToggle workspace_diagnostics<CR>', { desc = 'Open Workspace [D]iagnostics list' })
 
 -- Exit terminal mode in the builtin terminal with a shortcut that is a bit easier
 -- for people to discover. Otherwise, you normally need to press <C-\><C-n>, which
@@ -220,6 +223,8 @@ if not vim.loop.fs_stat(lazypath) then
   vim.fn.system { 'git', 'clone', '--filter=blob:none', '--branch=stable', lazyrepo, lazypath }
 end ---@diagnostic disable-next-line: undefined-field
 vim.opt.rtp:prepend(lazypath)
+
+vim.api.nvim_create_autocmd('FileType', { pattern = 'markdown', command = 'set awa' })
 
 -- [[ Configure and install plugins ]]
 --
@@ -294,6 +299,7 @@ require('lazy').setup({
         ['<leader>r'] = { name = '[R]ename', _ = 'which_key_ignore' },
         ['<leader>s'] = { name = '[S]earch', _ = 'which_key_ignore' },
         ['<leader>w'] = { name = '[W]orkspace', _ = 'which_key_ignore' },
+        -- ['<leader>w'] = { name = '[W]orkspace', _ = 'which_key_ignore' },
       }
     end,
   },
@@ -384,6 +390,8 @@ require('lazy').setup({
       vim.keymap.set('n', '<leader>sr', builtin.resume, { desc = '[S]earch [R]esume' })
       vim.keymap.set('n', '<leader>s.', builtin.oldfiles, { desc = '[S]earch Recent Files ("." for repeat)' })
       vim.keymap.set('n', '<leader><leader>', builtin.buffers, { desc = '[ ] Find existing buffers' })
+      vim.keymap.set('n', '<leader>sN', ':Telescope notify<CR>', { desc = 'Search [N]otify' })
+      vim.keymap.set('n', '<leader>sS', ':Telescope sessions_picker<CR>', { desc = 'Search [S]essions' })
 
       -- Slightly advanced example of overriding default behavior and theme
       vim.keymap.set('n', '<leader>/', function()
@@ -624,7 +632,7 @@ require('lazy').setup({
         lsp_fallback = true,
       },
       formatters_by_ft = {
-        lua = { 'stylua' },
+        -- lua = { 'stylua' },
         rs = { 'rustfmt' },
         -- Conform can also run multiple formatters sequentially
         -- python = { "isort", "black" },
@@ -729,36 +737,6 @@ require('lazy').setup({
     end,
   },
 
-  { -- You can easily change to a different colorscheme.
-    -- Change the name of the colorscheme plugin below, and then
-    -- change the command in the config to whatever the name of that colorscheme is
-    --
-    -- If you want to see what colorschemes are already installed, you can use `:Telescope colorscheme`
-    'folke/tokyonight.nvim',
-    lazy = false, -- make sure we load this during startup if it is your main colorscheme
-    priority = 1000, -- make sure to load this before all the other start plugins
-    config = function()
-      require('tokyonight').setup {
-        transparent = true,
-        terminal_colors = true,
-        styles = {
-          comments = { italic = true },
-          keywords = { italic = true },
-        },
-        dim_inactive = true,
-        lualine_bold = true,
-        hide_inactive_statusline = true,
-      }
-      -- Load the colorscheme here.
-      -- Like many other themes, this one has different styles, and you could load
-      -- any other, such as 'tokyonight-storm', 'tokyonight-moon', or 'tokyonight-day'.
-      vim.cmd.colorscheme 'tokyonight-night'
-
-      -- You can configure highlights by doing something like
-      vim.cmd.hi 'Comment gui=none'
-    end,
-  },
-
   -- Highlight todo, notes, etc in comments
   { 'folke/todo-comments.nvim', event = 'VimEnter', dependencies = { 'nvim-lua/plenary.nvim' }, opts = { signs = false } },
 
@@ -786,7 +764,9 @@ require('lazy').setup({
       vim.keymap.set('n', '<S-Tab>', ':bp<CR>', { desc = 'Previous Tab' })
       vim.keymap.set('n', '<C-x>', ':bd<CR>', { desc = 'Close Tab' })
 
-      require('mini.sessions').setup {}
+      require('mini.sessions').setup {
+        directory = '~/nvim-sessions/',
+      }
       require('mini.starter').setup {}
       require('mini.move').setup {}
       require('mini.indentscope').setup {

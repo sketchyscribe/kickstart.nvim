@@ -1,0 +1,1 @@
+-- vim.keymap.set('n', '<F5>', ':!odin run .<CR>', { desc = "Run Odin Project" })
